@@ -40,9 +40,9 @@ public class GeneralController extends ListenerAdapter {
                                             event.getGuild().getId()
                                     )).queue();
                     break;
-                /*case "top":
+                case "top":
                     event.replyEmbeds(userScoreController.getTopScores(event.getGuild().getId()).build()).queue();
-                    break;*/
+                    break;
                 default:
                     event.reply("No se que hacer").queue();
             }

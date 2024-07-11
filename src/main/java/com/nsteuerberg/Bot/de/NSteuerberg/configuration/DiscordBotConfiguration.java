@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource(value = "file:application-secret.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "classpath:application-secret.properties", ignoreResourceNotFound = true)
 /*
 * Esta clase se encarga de configurar el bot de discord, poner el token y el estado del bot
 */

@@ -32,16 +32,12 @@ public class UserScore {
         this.userScoreKey = userScoreKey;
     }
 
-    /*public String getUserId() {
+    public String getUserId() {
         return userScoreKey.getUserId();
-    }*/
+    }
 
-    /*public String getServerId(){
+    public String getServerId(){
         return userScoreKey.getServerId();
-    }*/
-
-    public UserScoreKey getUserID(){
-        return userScoreKey;
     }
 
     public int getScore() {

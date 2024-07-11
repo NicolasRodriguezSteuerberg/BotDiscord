@@ -1,5 +1,7 @@
 package com.nsteuerberg.Bot.de.NSteuerberg.command;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -20,11 +22,10 @@ public class CommandsBot {
     public void onApplicationReady() {
         jda.updateCommands().addCommands(
                 Commands.slash("saludar", "Saluda al bot"),
-                Commands.slash("puntuacion", "Muestra la puntuación del usuario")
-                //Commands.slash("top", "Muestra el top 5 de puntuaciones")
+                Commands.slash("puntuacion", "Muestra la puntuación del usuario"),
+                Commands.slash("top", "Muestra el top 5 de puntuaciones")
         ).queue();
     }
-
 
 
 }

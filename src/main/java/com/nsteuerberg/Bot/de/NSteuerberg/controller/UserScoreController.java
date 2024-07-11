@@ -25,9 +25,7 @@ public class UserScoreController{
         return userScoreService.obtenerPuntuacion(userId, serverId);
     }
 
-    /*
     public EmbedBuilder getTopScores(String serverId){
         return userScoreService.getTopScores(serverId);
     }
-    */
 }

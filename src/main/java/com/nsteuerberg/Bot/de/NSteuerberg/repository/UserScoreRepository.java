@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface UserScoreRepository extends CrudRepository<UserScore, UserScoreKey> {
-    /*@Query("SELECT u FROM UserScore u WHERE u.userScoreKey.serverId = :serverId ORDER BY u.score DESC")
+    @Query("SELECT u FROM UserScore u WHERE u.userScoreKey.serverId = :serverId ORDER BY u.score DESC")
     List<UserScore> findTopByServerId(@Param("serverId") String serverId);
-     */
+
 }
