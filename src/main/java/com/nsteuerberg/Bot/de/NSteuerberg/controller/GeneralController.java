@@ -1,5 +1,7 @@
 package com.nsteuerberg.Bot.de.NSteuerberg.controller;
 
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -10,9 +12,12 @@ import org.springframework.stereotype.Component;
 public class GeneralController extends ListenerAdapter {
 
     private final UserScoreController userScoreController;
+    private final MusicController musicController;
 
-    public GeneralController(UserScoreController userScoreController) {
+    @Autowired
+    public GeneralController(UserScoreController userScoreController, MusicController musicController) {
         this.userScoreController = userScoreController;
+        this.musicController = musicController;
     }
 
     // al recibir un mensaje, se impprime hola
@@ -43,7 +48,29 @@ public class GeneralController extends ListenerAdapter {
                                     )).queue();
                     break;
                 case "top":
-                    event.replyEmbeds(userScoreController.getTopScores(event.getGuild().getId()).build()).queue();
+                    event.replyEmbeds(
+                        userScoreController.getTopScores(
+                            event.getGuild().getId()
+                        ).build()
+                    ).queue();
+                    break;
+                case "play":
+                    Member member = event.getMember();
+                    if (member != null) {
+                        GuildVoiceState voiceState = member.getVoiceState();
+                        if (voiceState != null && voiceState.inAudioChannel()) {
+                            musicController.playMusic(
+                                event.getOption("cancion").getAsString(),
+                                event.getGuild(),
+                                voiceState.getChannel().getIdLong()
+                            );
+                            event.reply("Reproduciendo " + event.getOption("cancion").getAsString()).queue();
+                        } else {
+                            event.reply("Debes estar en un canal de voz").queue();
+                        }
+                        break;
+                    }
+                    event.reply("Error usuario no encontrado").queue();
                     break;
                 default:
                     event.reply("No se que hacer").queue();
