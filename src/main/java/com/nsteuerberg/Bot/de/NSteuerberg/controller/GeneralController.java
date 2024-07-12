@@ -1,7 +1,5 @@
 package com.nsteuerberg.Bot.de.NSteuerberg.controller;
 
-import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -35,7 +33,7 @@ public class GeneralController extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.isFromGuild()) {
+        if (event.isFromGuild() && !event.getUser().isBot()) {
             switch (event.getName()) {
                 case "saludar":
                     event.reply("Buenas tardes que tal").queue();
@@ -55,22 +53,7 @@ public class GeneralController extends ListenerAdapter {
                     ).queue();
                     break;
                 case "play":
-                    Member member = event.getMember();
-                    if (member != null) {
-                        GuildVoiceState voiceState = member.getVoiceState();
-                        if (voiceState != null && voiceState.inAudioChannel()) {
-                            musicController.playMusic(
-                                event.getOption("cancion").getAsString(),
-                                event.getGuild(),
-                                voiceState.getChannel().getIdLong()
-                            );
-                            event.reply("Reproduciendo " + event.getOption("cancion").getAsString()).queue();
-                        } else {
-                            event.reply("Debes estar en un canal de voz").queue();
-                        }
-                        break;
-                    }
-                    event.reply("Error usuario no encontrado").queue();
+                    musicController.playMusic(event);
                     break;
                 default:
                     event.reply("No se que hacer").queue();

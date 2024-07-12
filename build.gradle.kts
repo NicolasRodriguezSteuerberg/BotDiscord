@@ -22,6 +22,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	// jda
 	implementation("net.dv8tion:JDA:5.0.0")
+	// lava player
+	implementation("dev.arbjerg:lavaplayer:2.2.1")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
