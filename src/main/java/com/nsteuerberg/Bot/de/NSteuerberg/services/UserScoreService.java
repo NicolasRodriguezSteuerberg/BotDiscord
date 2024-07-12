@@ -54,22 +54,53 @@ public class UserScoreService {
     public EmbedBuilder getTopScores(String serverId){
         // recoger puntuacion
         List<UserScore> topFive = userScoreRepository.findTopByServerId(serverId);
+        // crear embed (mensaje con formato)
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Tabla de puntaciones");
         embedBuilder.setColor(Color.BLUE);
+        // si no hay usuarios devolvemos el embed
+        if (topFive.isEmpty()) {
+            return embedBuilder.setTitle("NADIE HA HABLADO EN ESTE SERVER");
+        }
+        // recoger la imagen del servidor
+        String urlImage = jda.getGuildById(serverId).getIconUrl();
+        if (urlImage == null) {
+            urlImage = jda.getSelfUser().getAvatarUrl();
+        }
+
+        embedBuilder.setAuthor("TABLA DE PUNTUACIONES", null, urlImage);
+
+        // si hay mas de 5 usuarios, se coge solo los 5 primeros
         if (topFive.size() > 5) {
             topFive = topFive.subList(0, 5);
         }
+        String positionEmoji;
         for (int i = 0; i < topFive.size(); i++) {
             UserScore userScore = topFive.get(i);
+            // asignar emoji segun la posicion
+            switch (i) {
+                case 0:
+                    positionEmoji = "🥇";
+                    String avatar = jda.retrieveUserById(userScore.getUserId()).complete().getAvatarUrl();
+                    if (avatar != null) {
+                        embedBuilder.setThumbnail(avatar);
+                    }
+                    break;
+                case 1:
+                    positionEmoji = "🥈";
+                    break;
+                case 2:
+                    positionEmoji = "🥉";
+                    break;
+                default:
+                    positionEmoji = "🗑️";
+            }
+            // añadir al embed
             embedBuilder.addField(
-                    "Puesto " + (i + 1),
-                    "<@!" + userScore.getUserId() + "> Puntuación: " + userScore.getScore(),
+                    positionEmoji + " Puesto " + (i + 1),
+                    "<@!" + userScore.getUserId() + "> | **XP:** `" + userScore.getScore() + "`",
                     false
             );
-            if (i == 0) {
-                embedBuilder.setThumbnail(jda.retrieveUserById(userScore.getUserId()).complete().getAvatarUrl());
-            }
+            // añadir imagen del servidor
         }
         return embedBuilder;
     }

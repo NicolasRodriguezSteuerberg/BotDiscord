@@ -18,17 +18,19 @@ public class GeneralController extends ListenerAdapter {
     // al recibir un mensaje, se impprime hola
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if(!event.getAuthor().isBot()) {
+        if(!event.getAuthor().isBot() && event.isFromGuild()) {
             userScoreController.incrementScore(
                     event.getAuthor().getId(),
                     event.getGuild().getId()
             );
+        } else if(!event.isFromGuild() && !event.getAuthor().isBot()){
+            event.getChannel().sendMessage("Por favor úsame en un server, no puedo hacer nada por mensajes privados").queue();
         }
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getUser().isBot()) {
+        if (event.isFromGuild()) {
             switch (event.getName()) {
                 case "saludar":
                     event.reply("Buenas tardes que tal").queue();
@@ -46,6 +48,8 @@ public class GeneralController extends ListenerAdapter {
                 default:
                     event.reply("No se que hacer").queue();
             }
+        } else{
+            event.reply("Este bot no es capaz de ejecutar comandos en mensajes privados").queue();
         }
     }
 }
