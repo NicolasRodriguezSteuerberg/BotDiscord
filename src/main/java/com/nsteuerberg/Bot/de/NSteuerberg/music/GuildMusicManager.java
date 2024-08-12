@@ -12,6 +12,8 @@ public class GuildMusicManager {
 
     public final TrackScheduler scheduler;
 
+    private final AudioPlayerSendHandler sendHandler;
+
     /**
      * Crea el reproductor de música y el planificador de pistas
      * @param manager Administrador de reproductores de audio para crear el reproductor
@@ -20,10 +22,15 @@ public class GuildMusicManager {
         this.player = manager.createPlayer();
         this.scheduler = new TrackScheduler(player);
         player.addListener(scheduler);
+        sendHandler = new AudioPlayerSendHandler(player);
+    }
+
+    public TrackScheduler getTrackScheduler() {
+        return scheduler;
     }
 
     public AudioPlayerSendHandler getSendHandler() {
-        return new AudioPlayerSendHandler(player);
+        return sendHandler;
     }
 
 }

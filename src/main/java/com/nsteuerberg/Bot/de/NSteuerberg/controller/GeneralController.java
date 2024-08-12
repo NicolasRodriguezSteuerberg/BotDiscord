@@ -55,6 +55,9 @@ public class GeneralController extends ListenerAdapter {
                 case "play":
                     musicController.playMusic(event);
                     break;
+                case "skip":
+                    musicController.skip(event);
+                    break;
                 default:
                     event.reply("No se que hacer").queue();
             }
