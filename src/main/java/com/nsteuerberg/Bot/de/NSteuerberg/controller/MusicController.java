@@ -9,11 +9,18 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,9 +55,11 @@ public class MusicController {
 
     public void skip(SlashCommandInteractionEvent event){
         // recogemos el gestor de música del servidor
-        GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
-        musicManager.scheduler.nextTrack();
-        event.reply("Pista saltada").queue();
+        if (connectToVoiceChannerl(event)) {
+            GuildMusicManager musicManager = getGuildAudioPlayer(event.getGuild());
+            musicManager.scheduler.nextTrack();
+            event.reply("Pista saltada").queue();
+        }
     }
 
     private void play(SlashCommandInteractionEvent event, String trackUrl) {
@@ -64,12 +73,12 @@ public class MusicController {
                 System.out.println(track.getInfo().toString());
                 event.reply(track.getInfo().title + " añadida a la cola").queue();
             }
-
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 for(AudioTrack track : playlist.getTracks()){
                     guildMusicManager.getTrackScheduler().queue(track);
                 }
+                event.reply("Playlist añadida a la cola").queue();
             }
 
             @Override
@@ -119,7 +128,18 @@ public class MusicController {
             Member self = event.getGuild().getSelfMember();
             GuildVoiceState selfVoiceState = self.getVoiceState();
             if (!selfVoiceState.inAudioChannel()) {
-                event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
+                AudioManager audioManager = event.getGuild().getAudioManager();
+                audioManager.openAudioConnection(memberVoiceState.getChannel());
+                GuildMusicManager guildMusicManager = getGuildAudioPlayer(event.getGuild());
+                guildMusicManager.getTrackScheduler().setAudioManager(audioManager);
+                if(event.getChannel() instanceof TextChannel){
+                    System.out.println("Es un canal de texto");
+                    guildMusicManager.getTrackScheduler().setTextChannel((TextChannel) event.getChannel());
+                }
+                else if(event.getChannel() instanceof VoiceChannel) {
+                    guildMusicManager.getTrackScheduler().setVoiceChannel((VoiceChannel) event.getChannel());
+                    System.out.println("Es un canal de voz");
+                }
                 return true;
             } else {
                 if (selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
