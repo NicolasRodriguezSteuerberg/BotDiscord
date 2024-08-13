@@ -3,19 +3,12 @@ package com.nsteuerberg.Bot.de.NSteuerberg.services;
 import com.nsteuerberg.Bot.de.NSteuerberg.model.UserScore;
 import com.nsteuerberg.Bot.de.NSteuerberg.model.UserScoreKey;
 import com.nsteuerberg.Bot.de.NSteuerberg.repository.UserScoreRepository;
-import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.JDA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
 import java.awt.*;
-import java.awt.print.Pageable;
 import java.util.List;
 
 @Service
