@@ -75,9 +75,7 @@ public class MusicController {
             }
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                for(AudioTrack track : playlist.getTracks()){
-                    guildMusicManager.getTrackScheduler().queue(track);
-                }
+                guildMusicManager.getTrackScheduler().queueAll(playlist.getTracks());
                 event.reply("Playlist añadida a la cola").queue();
             }
 

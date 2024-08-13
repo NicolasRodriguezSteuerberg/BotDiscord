@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -35,18 +36,6 @@ public class TrackScheduler extends AudioEventAdapter {
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
-    }
-
-    public void setTextChannel(TextChannel textChannel) {
-        this.textChannel = textChannel;
-    }
-
-    public void setVoiceChannel(VoiceChannel voiceChannel) {
-        this.voiceChannel = voiceChannel;
-    }
-
-    public void setAudioManager(AudioManager audioManager) {
-        this.audioManager = audioManager;
     }
 
     public void queue(AudioTrack track){
@@ -78,9 +67,14 @@ public class TrackScheduler extends AudioEventAdapter {
         }
     }
 
-    public AudioTrack getTrack() {
-        return queue.peek();
+    public void queueAll(Collection<AudioTrack> tracks){
+        boolean playing = player.getPlayingTrack() != null;
+        queue.addAll(tracks);
+        if (!playing) {
+            nextTrack();
+        }
     }
+
 
     @Override
     public void onPlayerPause(AudioPlayer player) {
@@ -108,7 +102,11 @@ public class TrackScheduler extends AudioEventAdapter {
         embed.setTitle("Reproduciendo ahora");
         embed.addField("**Título**", info.title, true);
         embed.addField("**Autor**", info.author, true);
-        embed.addField("**Duración**", String.valueOf(info.length), true);
+        // Parseamos la duración de la canción a minutos y segundos
+        String duracionMinsSegundos = String.format("%d:%02d",(info.length / 60000),(info.length / 1000) %60);
+        embed.addField("**Duración**", duracionMinsSegundos, true);
+        // poner un delay para que cuando se añada una playlist no ponga que haya 0 canciones
+        embed.addField("**Canciones en la cola: **", String.valueOf(queue.size()), false);
         return embed;
     }
 
@@ -128,4 +126,23 @@ public class TrackScheduler extends AudioEventAdapter {
     public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
         super.onTrackStuck(player, track, thresholdMs);
     }
+
+
+    public void setTextChannel(TextChannel textChannel) {
+        this.textChannel = textChannel;
+    }
+
+    public void setVoiceChannel(VoiceChannel voiceChannel) {
+        this.voiceChannel = voiceChannel;
+    }
+
+    public void setAudioManager(AudioManager audioManager) {
+        this.audioManager = audioManager;
+    }
+
+    public BlockingQueue<AudioTrack> getQueue() {
+        return queue;
+    }
+
+
 }
