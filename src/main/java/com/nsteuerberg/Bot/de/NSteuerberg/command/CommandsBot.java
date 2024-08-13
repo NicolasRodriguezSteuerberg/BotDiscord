@@ -24,7 +24,9 @@ public class CommandsBot {
                 Commands.slash("puntuacion", "Muestra la puntuación del usuario"),
                 Commands.slash("top", "Muestra el top 5 de puntuaciones"),
                 Commands.slash("play", "Reproduce una canción")
-                        .addOption(OptionType.STRING, "cancion", "Nombre de la canción a reproducir", true),
+                        .addOption(
+                                OptionType.STRING, "cancion",
+                                "Nombre de la canción a reproducir", true, true),
                 Commands.slash("skip", "Salta la canción actual")
         ).queue();
     }

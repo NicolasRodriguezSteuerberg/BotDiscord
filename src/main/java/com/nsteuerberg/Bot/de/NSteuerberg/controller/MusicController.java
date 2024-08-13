@@ -9,25 +9,26 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class MusicController {
@@ -81,6 +82,7 @@ public class MusicController {
             }
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                // si se pasa un nombre de canción en vez de una url, se añade a la cola la primera canción que se encuentre
                 if(trackUrl.startsWith("ytsearch:")){
                     AudioTrack track = playlist.getTracks().get(0);
                     guildMusicManager.getTrackScheduler().queue(track);
@@ -103,6 +105,56 @@ public class MusicController {
                 event.reply("No se ha podido cargar la canción").queue();
             }
         });
+    }
+
+    public void handleAutocomplete(CommandAutoCompleteInteractionEvent event) {
+        String query = event.getFocusedOption().getValue();
+        List<AudioTrack> searchResults = searchTracks(query);
+
+        List<String> options = searchResults.stream()
+                .limit(5)
+                .map(track -> track.getInfo().title)
+                .collect(Collectors.toList());
+
+        event.replyChoices(
+            options.stream().map(
+                option -> new Command.Choice(option, option)
+            ).collect(Collectors.toList())
+        ).queue();
+
+    }
+
+    public List<AudioTrack> searchTracks(String query) {
+        List<AudioTrack> tracks = new ArrayList<>();
+        playerManager.loadItem("ytsearch:" + query, new AudioLoadResultHandler() {
+            @Override
+            public void trackLoaded(AudioTrack track) {
+                tracks.add(track);
+            }
+
+            @Override
+            public void playlistLoaded(AudioPlaylist playlist) {
+                for (int i = 0; i < 5 || i < playlist.getTracks().size(); i++) {
+                    tracks.add(playlist.getTracks().get(i));
+                }
+            }
+
+            @Override
+            public void noMatches() {
+                System.out.println("No se ha encontrado la canción");
+            }
+
+            @Override
+            public void loadFailed(FriendlyException exception) {
+                System.out.println("No se ha podido cargar la canción");
+            }
+        });
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return tracks;
     }
 
     private GuildMusicManager getGuildAudioPlayer(Guild guild) {
