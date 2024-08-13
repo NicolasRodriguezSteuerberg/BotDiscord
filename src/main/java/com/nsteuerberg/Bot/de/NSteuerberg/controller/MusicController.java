@@ -24,6 +24,8 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +50,11 @@ public class MusicController {
     public void playMusic(SlashCommandInteractionEvent event) {
         if(connectToVoiceChannerl(event)) {
             String url = event.getOption("cancion").getAsString();
-
+            try {
+                new URI(url);
+            } catch (URISyntaxException e) {
+                url = "ytsearch:" + url;
+            }
             play(event, url);
         }
     }
@@ -75,6 +81,12 @@ public class MusicController {
             }
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                if(trackUrl.startsWith("ytsearch:")){
+                    AudioTrack track = playlist.getTracks().get(0);
+                    guildMusicManager.getTrackScheduler().queue(track);
+                    event.reply(track.getInfo().title + " añadida a la cola").queue();
+                    return;
+                }
                 guildMusicManager.getTrackScheduler().queueAll(playlist.getTracks());
                 event.reply("Playlist añadida a la cola").queue();
             }
